@@ -1,1 +1,1 @@
-# generator
+https://yasha84.github.io/generator
