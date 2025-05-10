@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>作品データ生成ツール</title>
+  <style>
+    input[type="text"] {
+      font-size: 16px;
+      padding: 8px;
+      width: 300px;
+      margin-bottom: 6px;
+    }
+
+    .tag-label {
+      display: inline-block;
+      padding: 6px 12px;
+      margin: 4px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      background-color: #f0f0f0;
+      transition: background-color 0.2s, color 0.2s;
+      user-select: none;
+    }
+
+    .tag-label input[type="checkbox"] {
+      display: none;
+    }
+
+    .tag-label.checked {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <h2>作品データ生成ツール</h2>
+  <strong>入力欄</strong><br>
+  <input type="text" id="input1" placeholder="タイトル"><br>
+  <input type="text" id="input2" placeholder="作品リンク"><br>
+  <input type="text" id="input3" placeholder="画像リンク"><br>
+  <input type="text" id="input4" placeholder="作者名"><br><br>
+
+  <div>
+    <strong>タグを選択</strong><br>
+    <div id="tagContainer"></div>
+  </div>
+
+  <br>
+  <button onclick="makeArray()">作成</button>
+  <button onclick="copyToClipboard()">コピー</button>
+
+  <pre id="result" style="margin-top:20px; background:#f0f0f0; padding:10px;"></pre>
+
+  <script>
+    // ★ここだけ書き換えればタグが増やせる！
+    const tags = [
+      { displayName: "男攻め", internalName: "boy" },
+      { displayName: "女攻め", internalName: "girl" },
+      { displayName: "男女攻め", internalName: "goth" },
+      { displayName: "おねショタ", internalName: "oneshota" },
+      { displayName: "hitomi", internalName: "hitomi" },
+      { displayName: "hitomi以外", internalName: "none" },
+      { displayName: "風呂", internalName: "bath" },
+      { displayName: "プール、海", internalName: "water" },
+      { displayName: "学校", internalName: "school" }
+      
+    ];
+
+    // タグの生成
+    const tagContainer = document.getElementById("tagContainer");
+
+    tags.forEach(tag => {
+      const label = document.createElement("label");
+      label.className = "tag-label";
+
+      // タグ表示名（ユーザーが見る名前）を設定
+      label.innerHTML = `
+        <input type="checkbox" class="tag-checkbox" value="${tag.internalName}">
+        <span>${tag.displayName}</span>
+      `;
+      tagContainer.appendChild(label);
+
+      // チェック時の見た目切り替え
+      const checkbox = label.querySelector("input");
+      checkbox.addEventListener("change", () => {
+        label.classList.toggle("checked", checkbox.checked);
+      });
+    });
+
+    function makeArray() {
+  const values = [
+    document.getElementById("input1").value,
+    document.getElementById("input2").value,
+    document.getElementById("input3").value,
+    document.getElementById("input4").value
+  ];
+
+  const tagCheckboxes = document.querySelectorAll(".tag-checkbox");
+  const selectedTags = Array.from(tagCheckboxes)
+    .filter(cb => cb.checked)
+    .map(cb => cb.value); // 内部名のみ
+
+  let result = "[\n";
+  values.forEach(value => {
+    result += `  "${value}",\n`;
+  });
+
+  if (selectedTags.length > 0) {
+    const tagLine = `[${selectedTags.map(tag => `"${tag}"`).join(", ")}]`;
+    result += `  ${tagLine}\n`;
+  }
+
+  result += "]";
+  document.getElementById("result").textContent = result;
+}
+
+    function copyToClipboard() {
+      const text = document.getElementById("result").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("コピーしました！");
+      }).catch(err => {
+        alert("コピーに失敗しました: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
